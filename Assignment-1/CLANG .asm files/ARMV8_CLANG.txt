@@ -1,0 +1,82 @@
+power:                                  // @power
+        sub     sp, sp, #32                     // =32
+        str     w0, [sp, #24]
+        str     w1, [sp, #20]
+        mov     w8, #1
+        str     w8, [sp, #16]
+        ldr     w8, [sp, #20]
+        cbnz    w8, .LBB0_2
+        mov     w8, #1
+        str     w8, [sp, #28]
+        b       .LBB0_7
+.LBB0_2:
+        mov     w8, #1
+        str     w8, [sp, #12]
+.LBB0_3:                                // =>This Inner Loop Header: Depth=1
+        ldr     w8, [sp, #12]
+        ldr     w9, [sp, #20]
+        add     w9, w9, #1                      // =1
+        subs    w8, w8, w9
+        b.ge    .LBB0_6
+        ldr     w8, [sp, #16]
+        ldr     w9, [sp, #24]
+        mul     w8, w8, w9
+        str     w8, [sp, #16]
+        ldr     w8, [sp, #12]
+        add     w8, w8, #1                      // =1
+        str     w8, [sp, #12]
+        b       .LBB0_3
+.LBB0_6:
+        ldr     w8, [sp, #16]
+        str     w8, [sp, #28]
+.LBB0_7:
+        ldr     w0, [sp, #28]
+        add     sp, sp, #32                     // =32
+        ret
+sum_squares:                            // @sum_squares
+        sub     sp, sp, #32                     // =32
+        stp     x29, x30, [sp, #16]             // 16-byte Folded Spill
+        add     x29, sp, #16                    // =16
+        stur    w0, [x29, #-4]
+        str     w1, [sp, #8]
+        ldur    w0, [x29, #-4]
+        mov     w8, #2
+        mov     w1, w8
+        str     w8, [sp, #4]                    // 4-byte Folded Spill
+        bl      power
+        ldr     w8, [sp, #8]
+        str     w0, [sp]                        // 4-byte Folded Spill
+        mov     w0, w8
+        ldr     w1, [sp, #4]                    // 4-byte Folded Reload
+        bl      power
+        ldr     w8, [sp]                        // 4-byte Folded Reload
+        add     w0, w8, w0
+        ldp     x29, x30, [sp, #16]             // 16-byte Folded Reload
+        add     sp, sp, #32                     // =32
+        ret
+main:                                   // @main
+        sub     sp, sp, #64                     // =64
+        stp     x29, x30, [sp, #48]             // 16-byte Folded Spill
+        add     x29, sp, #48                    // =48
+        mov     w8, wzr
+        stur    wzr, [x29, #-4]
+        mov     w9, #3
+        stur    w9, [x29, #-20]
+        mov     w9, #4
+        str     w9, [sp, #24]
+        ldur    w0, [x29, #-20]
+        ldr     w1, [sp, #24]
+        str     w8, [sp, #8]                    // 4-byte Folded Spill
+        bl      sum_squares
+        str     w0, [sp, #20]
+        ldr     w1, [sp, #20]
+        adrp    x0, .L.str
+        add     x0, x0, :lo12:.L.str
+        bl      printf
+        ldr     w8, [sp, #8]                    // 4-byte Folded Reload
+        mov     w0, w8
+        ldp     x29, x30, [sp, #48]             // 16-byte Folded Reload
+        add     sp, sp, #64                     // =64
+        ret
+.L.str:
+        .asciz  "c: %d\n"
